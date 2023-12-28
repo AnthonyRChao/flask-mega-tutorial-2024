@@ -1,7 +1,7 @@
 ## 2023-12-27
 
 To install a package on your machine, you use pip as follows:
-
+  
 `$ pip install <package-name>`
 
 > Interestingly, this method of installing packages will not work in most cases. If your Python interpreter was installed globally for all the users of your computer, chances are your regular user account is not going to have permission to make modifications to it, so the only way to make the command above work is to run it from an administrator account. But even without that complication, consider what happens when you install a package in this way. The pip tool is going to download the package from PyPI, and then add it to your Python installation. From that point on, every Python script that you have on your system will have access to this package.
@@ -111,3 +111,30 @@ from app import app
 def index():
 	return "Hello, World!"
 ```
+
+What's the difference between the two `app`s?
+
+```python
+# microblog.py
+
+from app import app
+```
+
+- The first `app` refers to the module, the second `app` refers to variable in the `app` module.
+
+What does `flask run` do?
+
+- The command looks for a Flask application instance in the module referenced by the `FLASK_APP` environment variable, which in this case is *microblog.py*. The command sets up a web server that is configured to forward requests to this application.
+
+Are environment variables remembered across terminal sessions?
+
+- They are not. To avoid having to type `FLASK_APP=microblog.py` every time you open a new terminal window, you can make use of `python-dotenv` and the `.flaskenv` file.
+```python
+(venv) $ pip install python-dotenv
+
+# .flaskenv
+
+FLASK_APP=microblog.py
+```
+
+- The `flask` command will look for the *.flaskenv* file and import all the variables defined in it exactly as if they were defined in the environment
