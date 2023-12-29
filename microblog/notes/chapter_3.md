@@ -109,8 +109,71 @@ def login():
 ```
 
 We import `LoginForm` from `forms.py`, instantiate an object from it, and send it down to the template `login.html`.
+
 **Receiving Form Data**
 
+- If we try to login currently, we get a "Method Not Allowed" page. Why do we receive this and how do we fix it? 
+   - We get this error because the browser is submitting a `POST` request to the application, but it is not configured to accept it. 
+   - The login view function we implemented so far only does half the job. It can render the login page and take input, but it does not have logic implemented to process the input.
+ 
+```python
+app/routes.py: Receiving login credentials
+
+from flask import render_template, flash, redirect
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        flash('Login requested for user {}, remember_me={}'.format(
+            form.username.data, form.remember_me.data))
+        return redirect('/index')
+    return render_template('login.html', title='Sign In', form=form)
+```
+- We add `method=['GET', 'POST'])` to the route decorator to allow the view function to accept `POST` requests. By default, it only accepts `GET` requests. 
+- HTTP protocol states `GET` requests are those that return information to the client (web browser in this case). And `POST` requests are those where the browser sends information to the server.
+- `form.validate_on_submit()`: this handles validation of `form` data, if everything is okay, it will return `True`, indicating the data is valid and can be processed by the application. If validation fails, it will return `False`. We will add an error message later.
+- `flash()`: useful way to show message to the user whether an action is successful or not
+- `redirect()`: function that instructs the client web browser to automatically navigate to a different specified page. We redirect to the `/index` page in this case.
+- Of note, when we call `flash()`, `Flask` stores the message, but the flashed messages don't magically appear. We need to update our base template
+
+```html
+app/templates/base.html: Flashed messages in base template
+
+<html>
+    <head>
+        {% if title %}
+        <title>{{ title }} - microblog</title>
+        {% else %}
+        <title>microblog</title>
+        {% endif %}
+    </head>
+    <body>
+        <div>
+            Microblog:
+            <a href="/index">Home</a>
+            <a href="/login">Login</a>
+        </div>
+        <hr>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </body>
+</html>
+```
+- `get_flashed_messages()`: Flask function that returns all flashed messages registered with `flask()` previously. This isn't the best styling, but updating that will come later.
+- Of note, the requested messages are "ephemeral". Once they are requested via `get_flashed_messages()` they are removed from the messages list, so they only appear once after the `flash()` function is called.
+
 **Improving Form Validation**
+
+- Currently, if users submit invalid data they don't get any feedback on the error. We can render this. The form validators already have descriptive error messages, we just need to add some additional logic to the template (`login.html`) to render them.
+- 
 
 **Generating Links**
