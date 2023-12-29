@@ -207,3 +207,48 @@ app/templates/login.html: Validation errors in login form template
 
 **Generating Links**
 
+- We have links in our application currently, but they are hardcoded. If we want to change/reorganize the links one day, we will have to find and replace all of them. e.g.
+
+```html
+<div>
+    Microblog:
+    <a href="/index">Home</a>
+    <a href="/login">Login</a>
+</div>
+```
+```python
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        # ...
+        return redirect('/index')
+    # ...
+```
+- To improve control over these links, we can use the `url_for()` function provided by Flask. This function generates URLs based on the internal mapping of URLs to view functions. The argument to `url_for()` is the endpoint name, which is the name of the function.
+- This is better because URLs change more often than view function names. Another reason is some URLs may have dynamic components in them. The `url_for()` function can generate these automatically instead of having to handle them by hand.
+- Updated:
+```html
+app/templates/base.html: Use url_for() function for links
+
+<div>
+    Microblog:
+    <a href="{{ url_for('index') }}">Home</a>
+    <a href="{{ url_for('login') }}">Login</a>
+</div>
+```
+```python
+app/routes.py: Use url_for() function for links
+
+from flask import render_template, flash, redirect, url_for
+
+# ...
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        # ...
+        return redirect(url_for('index'))
+    # ...
+```
