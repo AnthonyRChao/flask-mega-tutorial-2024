@@ -96,6 +96,19 @@ What does `{{ form.hidden_tag() }}` mean?
 
 **Form Views**
 
+The last step to view the form in the browser is to write a new view function in the application that renders the template from the previous section.
+
+```python
+...
+from app.forms import LoginForm
+...
+@app.route('/login')
+def login():
+    form = LoginForm()
+    return render_template('login.html', title='Sign In', form=form)
+```
+
+We import `LoginForm` from `forms.py`, instantiate an object from it, and send it down to the template `login.html`.
 **Receiving Form Data**
 
 **Improving Form Validation**
