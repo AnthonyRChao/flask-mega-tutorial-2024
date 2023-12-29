@@ -100,3 +100,36 @@ def index():
 
 - Almost all websites today have a navigation bar that appears on all pages of the application. While we could add a navigation bar with some HTML, as the application grows we would need to add this same bar to other pages. Ideally, we don't need to maintain several copies of the navigation bar.
 - Jinja has a feature which specifically addresses this problem. Essentially, it involves moving all parts of the page layout that are common to all templates to a base template (e.g. `base.html`), from which all other templates are derived.
+
+```html
+app/templates/base.html: Base template with navigation bar
+
+<!doctype html>
+<html>
+    <head>
+      {% if title %}
+      <title>{{ title }} - Microblog</title>
+      {% else %}
+      <title>Welcome to Microblog</title>
+      {% endif %}
+    </head>
+    <body>
+        <div>Microblog: <a href="/index">Home</a></div>
+        <hr>
+        {% block content %}{% endblock %}
+    </body>
+</html>
+```
+
+```html
+app/templates/index.html: Inherit from base template
+
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Hi, {{ user.username }}!</h1>
+    {% for post in posts %}
+    <div><p>{{ post.author.username }} says: <b>{{ post.body }}</b></p></div>
+    {% endfor %}
+{% endblock %}
+```
