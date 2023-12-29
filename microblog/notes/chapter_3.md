@@ -174,6 +174,36 @@ app/templates/base.html: Flashed messages in base template
 **Improving Form Validation**
 
 - Currently, if users submit invalid data they don't get any feedback on the error. We can render this. The form validators already have descriptive error messages, we just need to add some additional logic to the template (`login.html`) to render them.
-- 
+```html
+app/templates/login.html: Validation errors in login form template
+
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Sign In</h1>
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.username.label }}<br>
+            {{ form.username(size=32) }}<br>
+            {% for error in form.username.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.password.label }}<br>
+            {{ form.password(size=32) }}<br>
+            {% for error in form.password.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>{{ form.remember_me() }} {{ form.remember_me.label }}</p>
+        <p>{{ form.submit() }}</p>
+    </form>
+{% endblock %}
+```
+
+- We add two for loops, one for `username` and one for `password` to show the error message(s) in red.
 
 **Generating Links**
+
