@@ -27,7 +27,7 @@ For the vast majority of applications, we will need to persist and retrieve data
 - Add new configuration item to `config.py`
 
 ```python
-config.py: Flask-SQLAlchemy configuration
+# config.py: Flask-SQLAlchemy configuration
 
 import os
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -42,7 +42,7 @@ class Config(object):
 - In the application, we will represent the database as a database instance. The database migration engine will also have an instance. We create these objects are creating the application in the `app/__init__.py` file.
 
 ```python
-app/__init__.py: Flask-SQLAlchemy and Flask-Migrate initialization
+# app/__init__.py: Flask-SQLAlchemy and Flask-Migrate initialization
 
 from flask import Flask
 from config import Config
@@ -62,6 +62,42 @@ We make three changes here (notice, there is a pattern here of how to work with 
 - 3, we import a new module called `models`, this will define the structure of the database
  
 **Database Models**
+
+Q: How we store data in an application? For this example, let's say we don't want to write SQL directly.
+
+A: In a database, which we will represent by a collection of classes - commonly called _database models_. The ORM layer within SQLAlchemy will handle translating and mapping objects from these classes into rows in actual database tables.
+
+Q: Given a `users` table with the fields: `id`, `username`, `email`, and `password_hash`, what is the purpose of the `password_hash` field?
+
+A: Applications should not store passwords as clear text based on security best practices. Instead of writing passwords directly into the database, we will write `password_hash`es. We will handle how to do this in a later chapter. 
+
+Q: As part of our database model for the application, define a `Users` class with `sqlalchemy`.
+
+```python
+# app/models.py: User database model
+
+from typing import Optional
+import sqlalchemy as sa
+import sqlalchemy.orm as so
+from app import db
+
+class User(db.Model):
+    id: so.Mapped[int] = so.mapped_column(primary_key=True)
+    username: so.Mapped[str] = so.mapped_column(sa.String(64), index=True,
+                                                unique=True)
+    email: so.Mapped[str] = so.mapped_column(sa.String(120), index=True,
+                                             unique=True)
+    password_hash: so.Mapped[Optional[str]] = so.mapped_column(sa.String(256))
+
+    def __repr__(self):
+        return '<User {}>'.format(self.username)
+```
+- `sqlalchemy`: module includes general purpose database functions and classes such as types and query building helpers.
+- `sqlalchemy.orm`: provides support for using models
+- `db.Model`: base class for all models from `Flask-SQLAlchemy`
+- `so.Mapped[str/int]`: fields are assigned a type using Python _type hints_ wrapped with SQLAlchemy's `so.Mapped` generic type. In addition to defining the type of the column, this type declaration also makes values required (aka non-nullable). For a column to be allowed to be nullable, the `Optional` helper from Python is added, as shown in the `password_hash` field.
+- `so.mapped_column()`: defining table column requires more than just the type. This function allows additional configuration to be applied to each column.
+- `__repr__()`: this method tells Python how to print objects of this class, which will help with debugging.
 
 **Creating The Migration Repository**
 
