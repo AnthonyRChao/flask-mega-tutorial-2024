@@ -107,9 +107,72 @@ class User(db.Model):
 
 **The First Database Migration**
 
+- You can create a database migration manually or automatically. To do it automatically, Alembic compares the database schema as defined by the database models, against the actual database schema currently configured in the database. It then creates a migration script with the necessary changes to make the database schema match the application models. For our case, since there is no previous database, the automatic migration will add the entire `User` model to the migration script.
+```commandline
+(venv) ➜  microblog git:(main) flask db migrate -m "users table"
+INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.autogenerate.compare] Detected added table 'user'
+INFO  [alembic.autogenerate.compare] Detected added index ''ix_user_email'' on '('email',)'
+INFO  [alembic.autogenerate.compare] Detected added index ''ix_user_username'' on '('username',)'
+  Generating /Users/anthony/workspaces/flask-mega-tutorial-2024/microblog/migrations/versions/e62a92a5100e_users_table.py ...  done
+```
+- The `flask db migrate` command does not make any changes to the database, it just generates the migration script. To apply changes to the database we need to run `flask db upgrade`
+```commandline
+(venv) ➜  microblog git:(main) ✗ flask db upgrade
+INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> e62a92a5100e, users table
+```
+- Of note, the `upgrade` command will detect that a database does not currently exist and it will create it (SQLite file `app.db`, this is the SQLite database). When working with other databases like MySQL and PostgreSQL, we will need to create the database in the database server before running `upgrade`.
+
 **Database Upgrade and Downgrade Workflow**
 
+- Upgrade `flask db upgrade` and Downgrade `flask db downgrade` as necessary
+ 
 **Database Relationships**
+
+- Expand the database to store blog posts to see relationships in action 
+![img.png](img.png)
+- What is a foreign key? The `user_id` field in the `posts` table is a foreign key. **A foreign key is a field that reference a primary key of another table.**
+- In this example, the relationship of `user.id` to `posts.user_id` is one-to-many as one user can write many posts.
+```python
+# app/models.py: Posts database table and relationship
+
+from datetime import datetime, timezone
+from typing import Optional
+import sqlalchemy as sa
+import sqlalchemy.orm as so
+from app import db
+
+class User(db.Model):
+    id: so.Mapped[int] = so.mapped_column(primary_key=True)
+    username: so.Mapped[str] = so.mapped_column(sa.String(64), index=True,
+                                                unique=True)
+    email: so.Mapped[str] = so.mapped_column(sa.String(120), index=True,
+                                             unique=True)
+    password_hash: so.Mapped[Optional[str]] = so.mapped_column(sa.String(256))
+
+    posts: so.WriteOnlyMapped['Post'] = so.relationship(
+        back_populates='author')
+
+    def __repr__(self):
+        return '<User {}>'.format(self.username)
+
+class Post(db.Model):
+    id: so.Mapped[int] = so.mapped_column(primary_key=True)
+    body: so.Mapped[str] = so.mapped_column(sa.String(140))
+    timestamp: so.Mapped[datetime] = so.mapped_column(
+        index=True, default=lambda: datetime.now(timezone.utc))
+    user_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey(User.id),
+                                               index=True)
+
+    author: so.Mapped[User] = so.relationship(back_populates='posts')
+
+    def __repr__(self):
+        return '<Post {}>'.format(self.body)
+```
+- What are these new `User.posts` and `Post.author` fields for?
 
 **Playing with the Database**
 
