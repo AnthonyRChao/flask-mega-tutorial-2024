@@ -101,6 +101,10 @@ class User(db.Model):
 
 **Creating The Migration Repository**
 
+- We will use Flask-Migrate (Alembic) to handle changes to the database as the application grows. Alembic maintains a _migration repository_ which is a directory that holds all migration scripts. Each time a change is made to the database schema, a migration script is added to the repository with the details of the change.
+- To apply the migrations to a database, the migration scripts are executed in the sequence they were created.
+- Start everything off with `flask db init`
+
 **The First Database Migration**
 
 **Database Upgrade and Downgrade Workflow**
