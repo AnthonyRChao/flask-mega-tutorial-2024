@@ -181,5 +181,53 @@ class Post(db.Model):
 
 **Playing with the Database**
 
+```python
+>>> from app import app, db
+>>> from app.models import User, Post
+>>> import sqlalchemy as sa
+```
+> For Flask and its extensions to have access to the Flask application without having to pass app as an argument into every function, an application context must be created and pushed.
+
+Q: What is an _application context_?
+- ...
+
+```python
+>>> app.app_context().push()
+```
+> The application context that was pushed above allows Flask-SQLAlchemy to access the Flask application instance app without having to receive it as an argument. The extension looks in the app.config dictionary for the SQLALCHEMY_DATABASE_URI entry, which contains the database URL.
+
+> Now let's add a blog post:
+```python
+>>> u = db.session.get(User, 1)
+>>> p = Post(body='my first post!', author=u)
+>>> db.session.add(p)
+>>> db.session.commit()
+```
+> I did not need to set a value for the timestamp field, because this field has a default, which you can see in the model definition. And what about the `user_id` field? Recall that the `so.relationship` that I created in the Post class adds an author attribute to posts. I assign an author to a post using this author field instead of having to deal with user IDs. **SQLAlchemy is great in that respect, as it provides a high-level abstraction over relationships and foreign keys**.
+
+
+```python
+>>> # get all posts written by a user
+>>> u = db.session.get(User, 1)
+>>> u
+<User john>
+>>> query = u.posts.select()
+>>> posts = db.session.scalars(query).all()
+>>> posts
+[<Post my first post!>]
+
+>>> # same, but with a user that has no posts
+>>> u = db.session.get(User, 2)
+>>> u
+<User susan>
+>>> query = u.posts.select()
+>>> posts = db.session.scalars(query).all()
+>>> posts
+[]
+```
+Note how in the first two examples above the relationship between users and posts is used. Recall that the User model has a posts relationship attribute that was configured with the WriteOnlyMapped generic type. This is a special type of relationship that adds a `select()` method that returns a database query for the related items. The `u.posts.select()` expression takes care of generating the query that links the user to its blog posts.
+
 **Shell Context**
+
+- 
 
