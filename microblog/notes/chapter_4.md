@@ -172,7 +172,12 @@ class Post(db.Model):
     def __repr__(self):
         return '<Post {}>'.format(self.body)
 ```
+- Why do we index on the `timestamp` field?
+  - It may be useful to index on the `timestamp` field in case we want to efficiently retrieve posts in chronological order.
 - What are these new `User.posts` and `Post.author` fields for?
+> The User class has a new posts field, that is initialized with so.relationship(). This is not an actual database field, but a high-level view of the relationship between users and posts, and for that reason it isn't in the database diagram. Likewise, the Post class has an author field that is also initialized as a relationship. These two attributes allow the application to access the connected user and post entries.
+- What is the difference between `so.Mapped` and `so.WriteOnlyMapped`?
+  - ... 
 
 **Playing with the Database**
 
