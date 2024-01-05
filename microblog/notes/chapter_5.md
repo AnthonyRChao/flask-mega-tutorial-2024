@@ -190,8 +190,85 @@ Q: How does the `base.html` template know what `current_user.is_anonymous` is?
 
 A: The `is_anonymous` property is one of the attributes that Flask-Login adds to user objects through the `UserMixin` class.
 
-
 **Requiring Users To Login**
+
+Flask-Login provides a useful feature that forces users to log in before they can view certain pages of the application. If a user who is not logged in tries to view a protected page, Flask-Login will automatically redirect the user to the login form.
+
+For this to work, Flask-Login needs to know what is the view function that handles logins. This can be added in `app/__init__.py`.
+
+```python
+# ...
+login = LoginManager(app)
+login.login_view = 'login'
+```
+
+Flask-Login implements this feature with a decorator `@login_required`. When you add this decorator to a view function, the function becomes protected and won't allow users to access that are not authenticated. e.g.
+
+```python
+# app/routes.py: @login_required decorator
+
+from flask_login import login_required
+
+@app.route('/')
+@app.route('/index')
+@login_required
+def index():
+    # ...
+```
+
+Now, we want to implement the redirect back from the successful login to the page the user wanted to access.
+
+Key: when a user that isn't logged in accesses a view function protected by the `@login_required` decorator, the decorator is going to redirect to the login page, but it is going to include some **extra information** in this redirect so the application can return to the user to the original page.
+
+For example, if the user navigates to `/index` the `@login_required` decorator will intercept the request and respond with a redirect to `login` but it will add a query string argument to this URL, making the complete redirect url `/login?next=/index`. The `next` query string argument is set to the original URL, so the application can use that to redirect back after login.
+
+Something like:
+
+```commandline
+127.0.0.1 - - [05/Jan/2024 15:15:29] "GET /logout HTTP/1.1" 302 -
+127.0.0.1 - - [05/Jan/2024 15:15:29] "GET /index HTTP/1.1" 302 -
+127.0.0.1 - - [05/Jan/2024 15:15:29] "GET /login?next=/index HTTP/1.1" 200 -
+```
+
+We want to read and process the `next` query string argument. Here are changes in the `login_user()` call.
+
+```python
+# app/routes.py: Redirect to \"next\" page
+
+from flask import request
+from urllib.parse import urlsplit
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    # ...
+    if form.validate_on_submit():
+        user = db.session.scalar(
+            sa.select(User).where(User.username == form.username.data))
+        if user is None or not user.check_password(form.password.data):
+            flash('Invalid username or password')
+            return redirect(url_for('login'))
+        login_user(user, remember=form.remember_me.data)
+        next_page = request.args.get('next')
+        if not next_page or urlsplit(next_page).netloc != '':
+            next_page = url_for('index')
+        return redirect(next_page)
+    # ...
+```
+
+After user is logged in by calling Flask-Login's `login_user()` function, we extract the value of `next` query string argument by using Flask's provided `request` variable.
+
+`request`: variable that contains all information that the client sent with the request.
+`request.args`: attribute exposes the content of the query string as a dictionary
+
+We then address three specific cases to determine where to redirect to after a successful login.
+
+1. If the login URL does not have a `next` argument, redirect to `index` page
+2. If the login URL has a `next` argument that is set to a **relative path** redirect user to that URL (e.g. 'index')
+3. If the login URL has a `next` argument that is set to a full URL that includes a domain name, ignore this URL, and redirect user to `index` page.
+
+The first two cases are self-explanatory. The third case makes the application more secure. An attacker could insert a URL to a malicious site in the `next` argument, so our application only redirects when a URL is **relative**, which ensures that the redirect stays within the same site as the application.
+
+We determine if a URL is relative or absolute by parsing it with Python's `urlsplit()` function and then check if the `netloc` component is set or not.
 
 **Showing The Logged-In User in Templates** 
 
