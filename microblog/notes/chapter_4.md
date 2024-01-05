@@ -229,5 +229,35 @@ Note how in the first two examples above the relationship between users and post
 
 **Shell Context**
 
-- 
+- `flask shell` is used to start a Python interpreter in the context of the application, e.g.
 
+```python
+(venv) $ python
+>>> app
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'app' is not defined
+>>>
+
+(venv) $ flask shell
+>>> app
+<Flask 'app'>
+```
+
+In a regular interpreter session, `app` is unknown unless explicitly imported. When using `flask shell` the command pre-imports the application instance, and pushes its application context for you.
+
+One cool you thing you can do is to augment and also configure a "shell context", which is a list of other symbols to pre-import.
+
+```python
+import sqlalchemy as sa
+import sqlalchemy.orm as so
+from app import app, db
+from app.models import User, Post
+
+@app.shell_context_processor
+def make_shell_context():
+    return {'sa': sa, 'so': so, 'db': db, 'User': User, 'Post': Post}
+```
+
+Q: What does the `@app.shell_context_processor` decorator do?
+A: The decorator registers the function as a shell context function. When `flask shell` runs, it will invoke this function and register the items returned by it in the shell session.
