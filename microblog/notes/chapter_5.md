@@ -4,7 +4,7 @@
 ### User Logins 
 https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-v-user-logins
 
-**Password Hashing**
+#### Password Hashing
 
 In our `User` class we have a field `password_hash` which represents the hashed version of a user's password.
 
@@ -57,7 +57,7 @@ False
 True
 ```
 
-**Introduction to Flask-Login**
+#### Introduction to Flask-Login
 
 What is this extension for? Flask-Login is used to help managed login state for an application. e.g. users navigating to different pages while staying logged in. providing the "remember me" functionality that allows users to remain logged in even after closing the browser window.
 
@@ -82,7 +82,7 @@ login = LoginManager(app)
 # ...
 ```
 
-**Preparing The User Model for Flask-Login**
+#### Preparing The User Model for Flask-Login
 
 Flask-Login works with our applications user model as long as certain properties and methods are implemented, four specifically.
 
@@ -102,8 +102,25 @@ from flask_login import UserMixin
 class User(UserMixin, db.Model):
     # ...
 ```
+#### User Loader Function
 
-**User Loader Function**
+Q: How does Flask-Login keep track of logged-in users?
+
+A: Flask-Login stores the logged-in user's unique identifier in Flask's _user session_, a storage space assigned to each user who connects to the application. Every time a logged-in user navigates to a new page, Flask-Login retrieves the ID of the user from the session, then loads that user into memory.
+
+Flask-Login knows nothing about databases, so it needs the application's help in loading a user. For this reason, the extension expects the application to configure a **user loader function**, that can be called to load a user given the ID. We add this function to the `app/models.py` module.
+
+```python
+app/models.py: Flask-Login user loader function
+
+from app import login
+# ...
+
+@login.user_loader
+def load_user(id):
+    return db.session.get(User, int(id))
+```
+
 
 **Logging Users In**
 
