@@ -133,7 +133,7 @@ INFO  [alembic.runtime.migration] Running upgrade  -> e62a92a5100e, users table
 **Database Relationships**
 
 - Expand the database to store blog posts to see relationships in action 
-![img.png](img.png)
+![img.png](assets/img.png)
 - What is a foreign key? The `user_id` field in the `posts` table is a foreign key. **A foreign key is a field that reference a primary key of another table.**
 - In this example, the relationship of `user.id` to `posts.user_id` is one-to-many as one user can write many posts.
 ```python

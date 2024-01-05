@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from typing import Optional
+from werkzeug.security import check_password_hash, generate_password_hash
 import sqlalchemy as sa
 import sqlalchemy.orm as so
 from app import db
@@ -15,6 +16,12 @@ class User(db.Model):
 
     def __repr__(self):
         return f'<User {self.username}>'
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
 
 
 class Post(db.Model):
