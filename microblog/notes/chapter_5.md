@@ -59,9 +59,49 @@ True
 
 **Introduction to Flask-Login**
 
-What is this extension for?
+What is this extension for? Flask-Login is used to help managed login state for an application. e.g. users navigating to different pages while staying logged in. providing the "remember me" functionality that allows users to remain logged in even after closing the browser window.
+
+Install into virtual environment.
+
+```commandline
+(venv) $ pip install flask-login
+```
+
+Similar to other extensions, after installing, make sure to create and initialize after the app initialization in `app/__init__.py`.
+
+```python
+# app/__init__.py: Flask-Login initialization
+
+# ...
+from flask_login import LoginManager
+
+app = Flask(__name__)
+# ...
+login = LoginManager(app)
+
+# ...
+```
 
 **Preparing The User Model for Flask-Login**
+
+Flask-Login works with our applications user model as long as certain properties and methods are implemented, four specifically.
+
+- `is_authenticated`: a property that is `True` if the user has valid credentials, and `False` if otherwise
+- `is_active`: a property that is `True` if the user is active, and `False` if otherwise
+- `is_anonymous`: a property that is `False` for regular users, and `True` only for a special, anonymous user
+- `get_id()`: a method that returns a unique identifier for the user as a string
+
+While we can implement these properties/methods, Flask-Login provides a _mixin_ class, `UserMixin`, that includes safe implementations appropriate for most user model classes. We add this mixin class to our user model.
+
+```python
+# app/models.py: Flask-Login user mixin class
+
+# ...
+from flask_login import UserMixin
+
+class User(UserMixin, db.Model):
+    # ...
+```
 
 **User Loader Function**
 
