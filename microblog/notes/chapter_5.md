@@ -152,9 +152,44 @@ def login():
     return render_template('login.html', title='Sign In', form=form)
 ```
 
-
-
 **Logging Users Out**
+
+Flask-Login provides a `logout_user()` function to allow users to log out. Let's add a new logout view function.
+
+```python
+# app/routes.py: Logout view function
+
+# ...
+from flask_login import logout_user
+
+# ...
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
+```
+
+And now we expose this new link to users. Let's make the "Login" link in the navigation bar change to "Log Out" after a user logs in.
+
+```html
+app/templates/base.html: Conditional login and logout links
+
+        <div>
+            Microblog:
+            <a href="{{ url_for('index') }}">Home</a>
+            {% if current_user.is_anonymous %}
+            <a href="{{ url_for('login') }}">Login</a>
+            {% else %}
+            <a href="{{ url_for('logout') }}">Logout</a>
+            {% endif %}
+        </div>
+```
+
+Q: How does the `base.html` template know what `current_user.is_anonymous` is?
+
+A: The `is_anonymous` property is one of the attributes that Flask-Login adds to user objects through the `UserMixin` class.
+
 
 **Requiring Users To Login**
 
