@@ -299,3 +299,117 @@ def index():
 ```
 
 **User Registration**
+
+Now, let's build a registration for so users can register. Start with a web form class in `app/forms.py`
+
+```python
+# app/forms.py: User registration form
+
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
+import sqlalchemy as sa
+from app import db
+from app.models import User
+
+# ...
+
+class RegistrationForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    password2 = PasswordField(
+        'Repeat Password', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Register')
+
+    def validate_username(self, username):
+        user = db.session.scalar(sa.select(User).where(
+            User.username == username.data))
+        if user is not None:
+            raise ValidationError('Please use a different username.')
+
+    def validate_email(self, email):
+        user = db.session.scalar(sa.select(User).where(
+            User.email == email.data))
+        if user is not None:
+            raise ValidationError('Please use a different email address.')
+```
+
+For the validation queries, these queries should never find more than one result so instead of running with `db.session.scalars()`, we use `db.session.scalar()` which returns `None` if there are no results, or else the first result.
+
+To display this form on a web page, we need an HTML template, `app/templates/register.html`
+
+```html
+app/templates/register.html: Registration template
+
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Register</h1>
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.username.label }}<br>
+            {{ form.username(size=32) }}<br>
+            {% for error in form.username.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.email.label }}<br>
+            {{ form.email(size=64) }}<br>
+            {% for error in form.email.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.password.label }}<br>
+            {{ form.password(size=32) }}<br>
+            {% for error in form.password.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.password2.label }}<br>
+            {{ form.password2(size=32) }}<br>
+            {% for error in form.password2.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+{% endblock %}
+```
+
+Login Form template needs a link to send users to the registration form, below the form
+
+```html
+app/templates/login.html: Link to registration page
+
+    <p>New User? <a href="{{ url_for('register') }}">Click to Register!</a></p>
+```
+
+Add new register view function to ahndle user registrations in `app/routes.py`.
+
+```python
+app/routes.py: User registration view function
+
+from app import db
+from app.forms import RegistrationForm
+
+# ...
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        user = User(username=form.username.data, email=form.email.data)
+        user.set_password(form.password.data)
+        db.session.add(user)
+        db.session.commit()
+        flash('Congratulations, you are now a registered user!')
+        return redirect(url_for('login'))
+    return render_template('register.html', title='Register', form=form)
+```
