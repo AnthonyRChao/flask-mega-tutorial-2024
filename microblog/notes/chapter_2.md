@@ -37,12 +37,15 @@ def index():
 
 Ideally, **the application logic should be separate from the layout/presentation** of your web pages. (e.g. you could hire a web designer to build the UI while you code the application logic)
 
-**Templates** help achieve this separation between application logic and presentation.
+#### Templates
+
+Templates help achieve this separation between application logic and presentation.
 
 - The operation of converting a template into a complete HTML page is called _rendering_, via the function provided by the Flask framework `render_template()`
 - Of note, the `render_template()` function invokes the **Jinja** template engine that comes bundled with the Flask framework. Jinja substitutes `{{ ... }}` blocks with the corresponding values given by the arguments provided in the `render_template()` call.
 
-**Conditional Statements**
+#### Conditional Statements
+
 - Jinja supports control statements inside `{% ... %}` blocks, e.g.
 ```html
     ...
@@ -55,7 +58,7 @@ Ideally, **the application logic should be separate from the layout/presentation
     </head>
     ...
 ```
-**Loops**
+#### Loops
 - A list of `posts` can have any number of elements, it is up to the view function (`index()`) to decide how many posts are going to be presented in the page. For this problem, Jinja offers a `for` control structure.
 
 ```python
@@ -96,7 +99,7 @@ def index():
     ...
 ```
 
-**Template Inheritance**
+#### Template Inheritance
 
 - Almost all websites today have a navigation bar that appears on all pages of the application. While we could add a navigation bar with some HTML, as the application grows we would need to add this same bar to other pages. Ideally, we don't need to maintain several copies of the navigation bar.
 - Jinja has a feature which specifically addresses this problem. Essentially, it involves moving all parts of the page layout that are common to all templates to a base template (e.g. `base.html`), from which all other templates are derived.

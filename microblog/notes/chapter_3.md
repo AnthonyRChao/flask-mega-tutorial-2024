@@ -36,7 +36,7 @@ Now, we can update our flask application to reference this new `Config` class
 
 This configuration is relevant to Web Forms because the `SECRET_KEY` configuration variable is an important part of Flask applications. Flask and some of its extensions use the value of the secret key as a cryptographic key, useful to generate signatures or tokens. Flask-WTF extension also sues it to prevent CRSF attacks.
 
-**User Login Form**
+#### User Login Form
 
 The Flask-WTF extension uses Python classes to represent web forms.
 
@@ -56,7 +56,7 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Sign In')
 ```
 
-**Form Templates**
+#### Form Templates
 
 Next, we add the form to an HTML template so it can be rendered on a web page.
 
@@ -94,7 +94,7 @@ What does `{{ form.hidden_tag() }}` mean?
 
 - This template argument creates a hidden field that includes a token used to protect your application from CRSF attacks. We can protect this form by including this hidden field and having the `SECRET_KEY` variable defined in the Flask configuration. Flask-WTF takes care of the rest. 
 
-**Form Views**
+### Form Views
 
 The last step to view the form in the browser is to write a new view function in the application that renders the template from the previous section.
 
@@ -110,7 +110,7 @@ def login():
 
 We import `LoginForm` from `forms.py`, instantiate an object from it, and send it down to the template `login.html`.
 
-**Receiving Form Data**
+#### Receiving Form Data
 
 - If we try to login currently, we get a "Method Not Allowed" page. Why do we receive this and how do we fix it? 
    - We get this error because the browser is submitting a `POST` request to the application, but it is not configured to accept it. 
@@ -171,7 +171,7 @@ app/templates/base.html: Flashed messages in base template
 - `get_flashed_messages()`: Flask function that returns all flashed messages registered with `flask()` previously. This isn't the best styling, but updating that will come later.
 - Of note, the requested messages are "ephemeral". Once they are requested via `get_flashed_messages()` they are removed from the messages list, so they only appear once after the `flash()` function is called.
 
-**Improving Form Validation**
+#### Improving Form Validation
 
 - Currently, if users submit invalid data they don't get any feedback on the error. We can render this. The form validators already have descriptive error messages, we just need to add some additional logic to the template (`login.html`) to render them.
 ```html

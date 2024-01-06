@@ -6,7 +6,7 @@ https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-iv-database
 
 For the vast majority of applications, we will need to persist and retrieve data - so we need a database.
 
-**Databases in Flask**
+#### Databases in Flask
 
 - Of note, Flask doesn't support databases natively. This is by design, to allow the user to choose a database that best fits their needs rather than being forced to adapt to one.
 - Databases generally separate into two categories: relational and non-relational (often referenced as NoSQL).
@@ -16,12 +16,12 @@ For the vast majority of applications, we will need to persist and retrieve data
     - **ORMs allow applications to manage a database using high-level entities like classes, objects and methods instead of tables and SQL. An ORM exists to translate high-level operations into database commands**
     - The nice thing about SQLAlchemy is that it supports multiple database engines (e.g. MySQL, SQLite, PostgreSQL). This is nice because you can develop with something like a SQLite database (which doesn't need a server) then when it's time to deploy to production you can switch to a more robust database like MySQL or PostgreSQL without having to alter your application
     
-**Database Migrations**
+#### Database Migrations
 
 - `Flask-Migrate`: Flask wrapper for Alembic, a database migration framework for SQLAlchemy
 - While setting up `Flask-Migrate` adds some overhead work, it is worth it for the ability to more easily make changes to your database in the future.
 
-**Flask-SQLAlchemy Configuration**
+#### Flask-SQLAlchemy Configuration
 
 - During development, we will use a SQLite database. The advantage here is that SQLite databases are a single file and don't need a database server running like MySQL & PostgreSQL do.
 - Add new configuration item to `config.py`
@@ -61,7 +61,7 @@ We make three changes here (notice, there is a pattern here of how to work with 
 - 2, we added a `migrate` object, which represents the database migration engine
 - 3, we import a new module called `models`, this will define the structure of the database
  
-**Database Models**
+#### Database Models
 
 Q: How we store data in an application? For this example, let's say we don't want to write SQL directly.
 
@@ -99,13 +99,13 @@ class User(db.Model):
 - `so.mapped_column()`: defining table column requires more than just the type. This function allows additional configuration to be applied to each column.
 - `__repr__()`: this method tells Python how to print objects of this class, which will help with debugging.
 
-**Creating The Migration Repository**
+#### Creating The Migration Repository
 
 - We will use Flask-Migrate (Alembic) to handle changes to the database as the application grows. Alembic maintains a _migration repository_ which is a directory that holds all migration scripts. Each time a change is made to the database schema, a migration script is added to the repository with the details of the change.
 - To apply the migrations to a database, the migration scripts are executed in the sequence they were created.
 - Start everything off with `flask db init`
 
-**The First Database Migration**
+#### The First Database Migration
 
 - You can create a database migration manually or automatically. To do it automatically, Alembic compares the database schema as defined by the database models, against the actual database schema currently configured in the database. It then creates a migration script with the necessary changes to make the database schema match the application models. For our case, since there is no previous database, the automatic migration will add the entire `User` model to the migration script.
 ```commandline
@@ -126,11 +126,11 @@ INFO  [alembic.runtime.migration] Running upgrade  -> e62a92a5100e, users table
 ```
 - Of note, the `upgrade` command will detect that a database does not currently exist and it will create it (SQLite file `app.db`, this is the SQLite database). When working with other databases like MySQL and PostgreSQL, we will need to create the database in the database server before running `upgrade`.
 
-**Database Upgrade and Downgrade Workflow**
+#### Database Upgrade and Downgrade Workflow
 
 - Upgrade `flask db upgrade` and Downgrade `flask db downgrade` as necessary
  
-**Database Relationships**
+#### Database Relationships
 
 - Expand the database to store blog posts to see relationships in action 
 ![img.png](assets/img.png)
@@ -179,7 +179,7 @@ class Post(db.Model):
 - What is the difference between `so.Mapped` and `so.WriteOnlyMapped`?
   - ... 
 
-**Playing with the Database**
+#### Playing with the Database
 
 ```python
 >>> from app import app, db
