@@ -11,7 +11,6 @@ from app.models import User
 @app.route('/index')
 @login_required
 def index():
-	user = {'username': 'Miguel'}
 	posts = [
 		{
 			'author': {'username': 'John'},
@@ -29,7 +28,6 @@ def index():
 	return render_template(
 		'index.html',
 		title='Home',
-		user=user,
 		posts=posts
 	)
 
@@ -49,7 +47,7 @@ def login():
 		login_user(user, remember=form.remember_me.data)
 		next_page = request.args.get('next')
 		if not next_page or urlsplit(next_page).netloc != '':
-			next_page = url_for('/index')
+			next_page = url_for('index')
 		return redirect(next_page)
 	return render_template('login.html', title='Sign In', form=form)
 

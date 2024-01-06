@@ -272,4 +272,30 @@ We determine if a URL is relative or absolute by parsing it with Python's `urlsp
 
 **Showing The Logged-In User in Templates** 
 
+We previously used a fake user to help design the home page of the application before the user subsystem was in place. The application has real users now, so we will update to support working with real users.
+
+```html
+app/templates/index.html: Pass current user to template
+
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Hi, {{ current_user.username }}!</h1>
+    {% for post in posts %}
+    <div><p>{{ post.author.username }} says: <b>{{ post.body }}</b></p></div>
+    {% endfor %}
+{% endblock %}
+```
+
+```python
+# app/routes.py: Do not pass user to template anymore
+
+@app.route('/')
+@app.route('/index')
+@login_required
+def index():
+    # ...
+    return render_template("index.html", title='Home Page', posts=posts)
+```
+
 **User Registration**
