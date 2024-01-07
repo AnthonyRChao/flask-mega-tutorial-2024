@@ -153,7 +153,47 @@ app/templates/user.html: User avatars in posts
 
 #### Using Jinja Sub-Templates
 
+So, we added avatars to the user profile page, now we want to add something similar to the index page.
 
+We could copy/paste the portion of the template from the user page to the index page, but this isn't ideal because if we decided to make changes to the layout later, we'll have make the same update in two places.
+
+Better to make a sub-template that just renders one post, then reference it from both the `user.html` and `index.html` templates.
+
+Let's create `app/templates/_post.html`. The `_` prefix is just a naming convention to help use recognize which templates are sub-templates.
+
+```html
+app/templates/_post.html: Post sub-template
+
+<table>
+    <tr valign="top">
+        <td><img src="{{ post.author.avatar(36) }}"></td>
+        <td>{{ post.author.username }} says:<br>{{ post.body }}</td>
+    </tr>
+</table>
+```
+
+Now we can invoke this sub-template from the `user.html` template with Jinja's `include` statement.
+
+```html
+app/templates/user.html: User avatars in posts
+
+{% extends "base.html" %}
+
+{% block content %}
+    <table>
+        <tr valign="top">
+            <td><img src="{{ user.avatar(128) }}"></td>
+            <td><h1>User: {{ user.username }}</h1></td>
+        </tr>
+    </table>
+    <hr>
+    {% for post in posts %}
+        {% include '_post.html' %}
+    {% endfor %}
+{% endblock %}
+```
+
+The index page of the application isn't fleshed out yet, we will wait on adding this functionality there for now.
 
 #### More Interesting Profiles
 #### Recording The Last Visit Time For a User
