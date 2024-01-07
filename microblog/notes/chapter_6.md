@@ -125,7 +125,36 @@ app/templates/user.html: User avatar in template
 {% endblock %}
 ```
 
+And, we can also add avatars to user's posts on their user profile page to make the home page look nicer.
+
+```html
+app/templates/user.html: User avatars in posts
+
+{% extends "base.html" %}
+
+{% block content %}
+    <table>
+        <tr valign="top">
+            <td><img src="{{ user.avatar(128) }}"></td>
+            <td><h1>User: {{ user.username }}</h1></td>
+        </tr>
+    </table>
+    <hr>
+    {% for post in posts %}
+    <table>
+        <tr valign="top">
+            <td><img src="{{ post.author.avatar(36) }}"></td>
+            <td>{{ post.author.username }} says:<br>{{ post.body }}</td>
+        </tr>
+    </table>
+    {% endfor %}
+{% endblock %}
+```
+
 #### Using Jinja Sub-Templates
+
+
+
 #### More Interesting Profiles
 #### Recording The Last Visit Time For a User
 #### Profile Editor
