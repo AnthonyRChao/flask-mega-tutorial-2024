@@ -196,5 +196,59 @@ app/templates/user.html: User avatars in posts
 The index page of the application isn't fleshed out yet, we will wait on adding this functionality there for now.
 
 #### More Interesting Profiles
+
+Let's enhance our user profile page so users can add an "about me" section and a "last seen" so users can see when they last accessed the site and display it on their profile page. Kind of like with networthshare "last logged in".
+
+Start with extending the `users` table with two new fields.
+
+Added `about_me` and `last_seen` fields via new db migration.
+
+"I hope you realize how useful it is to work with a migration framework. Any users that were in the database are still there, the migration framework surgically applies the changes in the migration script without destroying any data."
+
+Add two new fields to user profile template.
+
 #### Recording The Last Visit Time For a User
+
+Write the current time on this field for a given user whenever that user sends a request to the server.
+
+To do this, we can execute a bit of generic logic ahead of a request being dispatched to a view function. This is such a common task in web applications that Flask offers it as a native feature.
+
+```python
+# app/routes.py: Record time of last visit
+
+from datetime import datetime, timezone
+
+@app.before_request
+def before_request():
+    if current_user.is_authenticated:
+        current_user.last_seen = datetime.now(timezone.utc)
+        db.session.commit()
+```
+
+Adding this enables "Last seen on: ..." to show on User Profile pages.
+
 #### Profile Editor
+
+Introduce a way for users to enter information about themselves.
+
+They should be able to change their username and about me sections.
+
+Edits will involve updating:
+- `app/forms.py`
+- `app/templates/edit_profile.html`
+- `app/templates/user.html`
+- `app/routes.py`
+
+```python
+# app/forms.py: Profile editor form
+
+from wtforms import TextAreaField
+from wtforms.validators import Length
+
+# ...
+
+class EditProfileForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    about_me = TextAreaField('About me', validators=[Length(min=0, max=140)])
+    submit = SubmitField('Submit')
+```
