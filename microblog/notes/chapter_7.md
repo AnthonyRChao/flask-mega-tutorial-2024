@@ -1,5 +1,5 @@
 ## Chapter 7
-## 2024-04-08
+2024-04-08
 
 Intentional bug left in. Create two users. Change one user's name to the other via "Edit Your Profile Link". You will receive a `500 Internal Server Error`.
 

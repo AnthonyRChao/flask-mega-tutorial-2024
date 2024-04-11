@@ -1,5 +1,5 @@
 ## Chapter 2
-## 2023-12-28
+2023-12-28
 
 ### Templates
 https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-ii-templates

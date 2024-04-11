@@ -1,5 +1,5 @@
 ## Chapter 3
-## 2023-12-28
+2023-12-28
 
 ### Web Forms
 https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-iii-web-forms

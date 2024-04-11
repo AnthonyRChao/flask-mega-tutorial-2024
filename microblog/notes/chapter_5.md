@@ -1,5 +1,5 @@
 ## Chapter 5
-## 2024-01-05
+2024-01-05
 
 ### User Logins 
 https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-v-user-logins
